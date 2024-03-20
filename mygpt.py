@@ -37,6 +37,14 @@ def get_key():
     except:
         raise Exception(f'did not find the API key at: {keypath}')
 
+def input_block(prompt):
+    block = ''
+    line = input(prompt)
+    while line:
+        block += '{}\n'.format(line)
+        line = input()
+    return block
+
 def process_response(resp):
     message = resp['choices'][0]['message']
     model = resp['model']
@@ -64,7 +72,7 @@ def enter_query_loop(args, query):
             message, model = process_response(response)
             messages += [message]
             log_interaction(log, query, message['content'])
-            query = input(f"{model}:\n")        
+            query = input_block(f"{model}:\n")        
 
 
 def cli_parser():
@@ -78,7 +86,7 @@ def cli_parser():
 def main():
     args = cli_parser()
     print('args:', args)
-    query = input(f"{args.model}:\n")
+    query = input_block(f"{args.model}:\n")
     if query:
         enter_query_loop(args, query)
 
