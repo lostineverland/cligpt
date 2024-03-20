@@ -14,8 +14,6 @@ def callgpt(messages, model, api_key):
              "messages": messages,
              "temperature": 0.7
            }).encode('utf-8')
-    print('headers:', headers)
-    print('data:', data)
     req = urllib.request.Request(endpoint, data=data, headers=headers)
     try:
         with urllib.request.urlopen(req) as response:
@@ -38,33 +36,32 @@ def get_key():
         raise Exception(f'did not find the API key at: {keypath}')
 
 def process_response(resp):
-    print('resp', json.dumps(resp, indent=2))
     message = resp['choices'][0]['message']
     model = resp['model']
-    print('message, model:', message, model)
     return message, model
 
-def log_interaction(log, header, message):
-    underline = '-' * len(header)
-    rendered_text = f'{header}\n{underline}\n{message}\n\n'
-    log.write(rendered_text)
-    print(rendered_text, flush=True)
+def log_interaction(log, query, answer):
+    u_ = lambda s: '-' * len(s) # underline function
+    q = 'Question:'
+    a = 'Answer:'
+    rendered_q = f'{q}\n{u_(q)}\n\n'
+    rendered_a = f'{a}\n{u_(a)}\n\n'
+    log.write(rendered_q + rendered_a)
+    print(rendered_a, flush=True)
 
-def enter_query_loop(args):
+def enter_query_loop(args, query):
     api_key = get_key()
     os.makedirs(os.path.join(os.getcwd(), 'GPT_logs'), exist_ok=True)
     messages = [{"role": "system", "content": args.role}]
     model = args.model
-    print('entering query loop')
     with open(f"{latest()}.md", 'w') as log:
-        while True:
-            query = input(f"{model}:\n")
-            log_interaction(log, 'Question:', query)
+        while query:
             messages += [dict(role='user', content=query)]
             response = callgpt(messages, args.model, api_key)
             message, model = process_response(response)
             messages += message
-            log_interaction(log, 'Answer:', message['content'])
+            log_interaction(log, query, message['content'])
+            query = input(f"{model}:\n")        
 
 
 def cli_parser():
@@ -77,7 +74,9 @@ def cli_parser():
 
 def main():
     args = cli_parser()
-    enter_query_loop(args)
+    query = input(f"{args.model}:\n")
+    if query:
+        enter_query_loop(args, query)
 
 if __name__ == '__main__':
     main()
