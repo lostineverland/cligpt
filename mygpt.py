@@ -25,7 +25,15 @@ def callgpt(messages, model, api_key):
     except urllib.error.URLError as e:
         raise e
 
-def latest():
+def iso_year():
+    ISO_8601_YEAR = '%Y'
+    return datetime.datetime.now().strftime(ISO_8601_YEAR)
+
+def iso_month():
+    ISO_8601_MONTH = '%Y-%m'
+    return datetime.datetime.now().strftime(ISO_8601_MONTH)
+
+def iso_minute():
     ISO_8601_MINUTES = '%Y-%m-%dT%H-%M'
     return datetime.datetime.now().strftime(ISO_8601_MINUTES)
 
@@ -63,10 +71,10 @@ def log_interaction(log, query, answer):
 
 def enter_query_loop(args, query):
     api_key = get_key()
-    os.makedirs(os.path.join(os.getcwd(), 'GPT_logs'), exist_ok=True)
+    os.makedirs(os.path.join(os.getcwd(), 'GPT_logs', iso_year(), iso_month()), exist_ok=True)
     messages = [{"role": "system", "content": args.role}]
     model = args.model
-    log_path = os.path.join('GPT_logs', '{}.md'.format(latest()))
+    log_path = os.path.join('GPT_logs', iso_year(), iso_month(), '{}.md'.format(iso_minute()))
     with open(log_path, 'w') as log:
         while query:
             messages += [dict(role='user', content=query)]
