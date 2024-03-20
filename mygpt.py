@@ -49,7 +49,7 @@ def log_interaction(log, query, answer):
     rendered_q = f'{q}\n{u_(q)}\n{query}\n\n'
     rendered_a = f'{a}\n{u_(a)}\n{answer}\n\n\n'
     log.write(rendered_q + rendered_a)
-    print(rendered_a, flush=True)
+    print('\n' + rendered_a, flush=True)
 
 def enter_query_loop(args, query):
     api_key = get_key()
@@ -77,6 +77,7 @@ def cli_parser():
 
 def main():
     args = cli_parser()
+    print('args:', args)
     query = input(f"{args.model}:\n")
     if query:
         enter_query_loop(args, query)
