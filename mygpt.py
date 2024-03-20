@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 import json, argparse
 import os, datetime
 import urllib.request
