@@ -7,13 +7,14 @@ def callgpt(messages, model, api_key):
     endpoint = 'https://api.openai.com/v1/chat/completions'
     headers = {
         "Content-Type": "application/json",
-        "Authorization": "Bear {}".format(api_key)
+        "Authorization": "Bearer {}".format(api_key)
     }
     data = json.dumps({
              "model": model,
              "messages": messages,
              "temperature": 0.7
            }).encode('utf-8')
+    print('headers:', headers)
     print('data:', data)
     req = urllib.request.Request(endpoint, data=data, headers=headers)
     try:
@@ -26,7 +27,7 @@ def callgpt(messages, model, api_key):
 
 def latest():
     ISO_8601_MINUTES = '%Y-%m-%dT%H-%M'
-    lambda: datetime.datetime.now().strftime(ISO_8601_MINUTES)
+    return datetime.datetime.now().strftime(ISO_8601_MINUTES)
 
 def get_key():
     keypath = os.path.join(os.getenv('HOME'), '.mygpt')
@@ -37,13 +38,15 @@ def get_key():
         raise Exception(f'did not find the API key at: {keypath}')
 
 def process_response(resp):
+    print('resp', json.dumps(resp, indent=2))
     message = resp['choices'][0]['message']
     model = resp['model']
+    print('message, model:', message, model)
     return message, model
 
 def log_interaction(log, header, message):
     underline = '-' * len(header)
-    rendered_text = f'{header}\n{underline}\n\n'
+    rendered_text = f'{header}\n{underline}\n{message}\n\n'
     log.write(rendered_text)
     print(rendered_text, flush=True)
 
