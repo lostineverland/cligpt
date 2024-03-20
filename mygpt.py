@@ -44,8 +44,8 @@ def log_interaction(log, query, answer):
     u_ = lambda s: '-' * len(s) # underline function
     q = 'Question:'
     a = 'Answer:'
-    rendered_q = f'{q}\n{u_(q)}\n\n'
-    rendered_a = f'{a}\n{u_(a)}\n\n'
+    rendered_q = f'{q}\n{u_(q)}\n\n{query}\n\n'
+    rendered_a = f'{a}\n{u_(a)}\n\n{answer}\n\n'
     log.write(rendered_q + rendered_a)
     print(rendered_a, flush=True)
 
