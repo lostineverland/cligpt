@@ -54,7 +54,8 @@ def enter_query_loop(args, query):
     os.makedirs(os.path.join(os.getcwd(), 'GPT_logs'), exist_ok=True)
     messages = [{"role": "system", "content": args.role}]
     model = args.model
-    with open(f"{latest()}.md", 'w') as log:
+    log_path = os.path.join('GPT_logs', '{}.md'.format(latest()))
+    with open(log_path, 'w') as log:
         while query:
             messages += [dict(role='user', content=query)]
             response = callgpt(messages, args.model, api_key)
