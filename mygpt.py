@@ -43,6 +43,7 @@ def input_block(prompt):
     while line:
         block += '{}\n'.format(line)
         line = input()
+    print('...')
     return block
 
 def process_response(resp):
@@ -57,6 +58,7 @@ def log_interaction(log, query, answer):
     rendered_q = f'{q}\n{u_(q)}\n{query}\n\n'
     rendered_a = f'{a}\n{u_(a)}\n{answer}\n\n\n'
     log.write(rendered_q + rendered_a)
+    log.flush()
     print('\n' + rendered_a, flush=True)
 
 def enter_query_loop(args, query):
