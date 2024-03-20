@@ -60,7 +60,7 @@ def enter_query_loop(args, query):
             messages += [dict(role='user', content=query)]
             response = callgpt(messages, args.model, api_key)
             message, model = process_response(response)
-            messages += message
+            messages += [message]
             log_interaction(log, query, message['content'])
             query = input(f"{model}:\n")        
 
