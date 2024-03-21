@@ -6,9 +6,6 @@ import urllib.request
 import urllib.error
 from collections import namedtuple
 
-# turns a dict into an object
-objdict = lambda d: namedtuple('objdict', d.keys())(**d)
-
 def callgpt(messages, model, api_key):
     endpoint = 'https://api.openai.com/v1/chat/completions'
     headers = {
@@ -95,8 +92,7 @@ def get_config():
 def enter_query_loop(args, query, config):
     api_key = config.get('api_key')
     log_path = os.path.join(setpath(config), iso_year(), iso_month(), '{}.md'.format(iso_minute()))
-    messages = [{"role": "system", "content": args.role or config.get('role', 'You are a knowledge engine')}]
-    model = args.model or config.get('model', 'gpt-4')
+    messages = [{"role": "system", "content": args.role}]
     with open(log_path, 'w') as log:
         while query:
             messages += [dict(role='user', content=query)]
@@ -107,18 +103,21 @@ def enter_query_loop(args, query, config):
             query = input_block(f"{model}:\n")        
 
 
-def cli_parser():
+def cli_parser(config):
     '''CLI tools'''
     parser = argparse.ArgumentParser(description='This runs OpenAI GPT from the terminal. Press CTRL-C to exit.')
-    parser.add_argument('role', nargs='?', default=None,
+    parser.add_argument('role', nargs='?', default=config.get('role', 'You are a knowledge engine'),
         help='Describe What kind of agent/helper you want, (default is set in $HOME/.cligpt)')
-    parser.add_argument('-m', '--model', dest='model', default=None, help='Which model ie "gpt-4-turbo-preview"')
+    parser.add_argument('-m', '--model',
+        dest='model',
+        default=config.get('model', 'gpt-4'),
+        help='Which model ie "gpt-4-turbo-preview"')
     return parser.parse_args()
 
 def main():
     config = get_config()
-    args = cli_parser()
-    print('args:', args)
+    args = cli_parser(config)
+    print('role: {}\nmodel: {}'.format(args.role, args.model))
     query = input_block(f"{args.model}:\n")
     if query:
         enter_query_loop(args, query, config)
