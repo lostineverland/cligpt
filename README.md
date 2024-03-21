@@ -27,7 +27,7 @@ To exit, just send an empty query (hit enter on an empty query).
 ➜  ~ cligpt -m gpt-4-turbo-preview "You are a travel agent"
 args: Namespace(role='You are a travel agent', model='gpt-4-turbo-preview')
 gpt-4-turbo-preview:
-I'm looking for a vacation with beach an mountains.
+I'm looking for a vacation with beach and mountains.
 
 ...
 
