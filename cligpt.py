@@ -102,6 +102,18 @@ def enter_query_loop(args, query, config):
             log_interaction(log, query, message['content'])
             query = input_block(f"{model}:\n")        
 
+def update(config):
+    if config.get('source'):
+        src = config.get('source')
+    elif config.force:
+        src = os.path.dirname(os.path.realpath(__file__))
+    else:
+        print('Update only works if `source` is defined in `~/.cligpt` to:', os.path.dirname(os.path.realpath(__file__)))
+        return
+    cmd = ['cd', src, '&&', 'git pull']
+    process = subprocess.Popen(cmd, stdout=None, stderr=None)
+    process.wait()
+    print('update succeeded')
 
 def cli_parser(config):
     '''CLI tools'''
@@ -112,11 +124,14 @@ def cli_parser(config):
         dest='model',
         default=config.get('model', 'gpt-4'),
         help='Which model ie "gpt-4-turbo-preview"')
+    parser.add_argument('--update', dest='update', action='store_true', default=False, help='Update cligpt')
+    parser.add_argument('--force', dest='force', action='store_true', default=False, help='Add to force an update without having to define `source`')
     return parser.parse_args()
 
 def main():
     config = get_config()
     args = cli_parser(config)
+    if args.update: return update(config)
     print('role: {}\nmodel: {}'.format(args.role, args.model))
     query = input_block(f"{args.model}:\n")
     if query:
