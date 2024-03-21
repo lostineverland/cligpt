@@ -19,7 +19,13 @@ Every interaction is logged at the current working directory in a folder called 
 
 ## Use
 
-Because the prompt allows for multiline entries, it takes an empty line to signal that you're done. When the entry has been accepted it will print `...`, which only happens after hitting return on an empty line. The query is then sent to openAI and the results are both returned to the terminal and written to the log file. Depending on the model used, it can take a long time to get a response (> 1 minute).
+First have a look at the options:
+
+```sh
+➜  ~ cligpt --help
+```
+
+Because the prompt allows for multiline entries, it takes an empty line to signal that you're done. When the entry has been accepted it will print `processing...`, which only happens after hitting return on an empty line. The query is then sent to openAI and the results are both returned to the terminal and written to the log file. Depending on the model used, it can take a long time to get a response (> 1 minute).
 
 To exit, just send an empty query (hit enter on an empty query).
 

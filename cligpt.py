@@ -44,7 +44,7 @@ def input_block(prompt):
     while line:
         block += '{}\n'.format(line)
         line = input()
-    print('...')
+    print('processing...')
     return block
 
 def process_response(resp):
