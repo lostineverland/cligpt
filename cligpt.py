@@ -38,7 +38,7 @@ def iso_minute():
     return datetime.datetime.now().strftime(ISO_8601_MINUTES)
 
 def get_key():
-    keypath = os.path.join(os.getenv('HOME'), '.mygpt')
+    keypath = os.path.join(os.getenv('HOME'), '.cligpt')
     try:
         with open(keypath) as f:
             return f.read().rstrip()
