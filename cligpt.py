@@ -89,6 +89,16 @@ def get_config():
     except FileNotFoundError:
         set_default_config(config_path)
 
+def summary(log, args, config, messages):
+    api_key = config.get('api_key')
+    messages += [dict(role='user', content='summarize this conversation in 4 keywords or less')]
+    print('\n\nfetching summary keywords...')
+    response = callgpt(messages, args.model, api_key)
+    message, model = process_response(response)
+    print(message)
+    s = 'Summary Keywords'
+    log.write('\n\n{}\n{}\n{}'.format(s, '-'*len(s), message.get('content')))
+
 def enter_query_loop(args, query, config):
     api_key = config.get('api_key')
     log_path = os.path.join(setpath(config), iso_year(), iso_month(), '{}.md'.format(iso_minute()))
@@ -101,6 +111,7 @@ def enter_query_loop(args, query, config):
             messages += [message]
             log_interaction(log, query, message['content'])
             query = input_block(f"{model}:\n")        
+        summary(log, args, config, messages)
 
 def update(config):
     if config.get('source'):
