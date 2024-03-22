@@ -95,7 +95,7 @@ def summary(log, args, config, messages):
     print('\n\nfetching summary keywords...')
     response = callgpt(messages, args.model, api_key)
     message, model = process_response(response)
-    print(message)
+    print(message.get('content'))
     s = 'Summary Keywords'
     log.write('\n\n{}\n{}\n{}'.format(s, '-'*len(s), message.get('content')))
 
@@ -113,10 +113,10 @@ def enter_query_loop(args, query, config):
             query = input_block(f"{model}:\n")        
         summary(log, args, config, messages)
 
-def update(config):
+def update(config, args):
     if config.get('source'):
         src = config.get('source')
-    elif config.force:
+    elif args.force:
         src = os.path.dirname(os.path.realpath(__file__))
     else:
         print('Update only works if `source` is defined in `~/.cligpt` to:', os.path.dirname(os.path.realpath(__file__)))
@@ -142,7 +142,7 @@ def cli_parser(config):
 def main():
     config = get_config()
     args = cli_parser(config)
-    if args.update: return update(config)
+    if args.update: return update(config, args)
     print('role: {}\nmodel: {}'.format(args.role, args.model))
     query = input_block(f"{args.model}:\n")
     if query:
