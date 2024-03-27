@@ -14,11 +14,11 @@ The use case for them is simple, most of them are using MacOS, so it's very easy
 
 I also want them to learn about the interaction, context really matters, this is not like a search engine. With this in mind, multi-line inputs encourages a more thorough and thought-out prompt.
 
-On the history or consumption side, they can use Obsidian, Logseq or any markdown reader to lookup their past queries and organize their thoughts around the topic.
+On the history or consumption side, they can use Obsidian, Logseq or any markdown reader to lookup their past queries and organize their thoughts around the topic. Though, this aims to optimize consumption with Obsidian.
 
 ### Why not a plug-in
 
-A plug-in may still happen, but I wanted an MVP. After all, I don't really know that they will use it. Also, I'm a SublimeText user, so I would create a plug-in only for sublime, which is not the most popular choice.
+A plug-in may still happen, but I wanted an MVP. After all, I don't really know that they will use it. Also, I'm a SublimeText user, so I would create a plug-in only for sublime, which is not the most popular choice. What I should make is an Obsidian plug-in, but there are already plenty of those. Again, this is just an MVP.
 
 ## Installation
 
@@ -26,7 +26,7 @@ A plug-in may still happen, but I wanted an MVP. After all, I don't really know 
 - add to your `$PATH` and run it
   - I like to create a symlink to the executable from a dir in `$PATH`
     -  `cd ~/bin && ln -s <repository>/cligpt.py cligpt`
-  - `cligpy`
+  - `cligpt`
     - this creates the config file
 - Obtain an API key from [OpenAI](https://platform.openai.com/api-keys)
 - place the key in `$HOME/.cligpt`
@@ -75,4 +75,10 @@ Each of these destinations offers a rich blend of beach relaxation and mountain 
 
 gpt-4-0125-preview:
 
+```
+
+Each new execution of `cligpt` holds it's own context. To continue an old conversation you will need to resume by providing the path to the conversation that you want to resume.
+
+```sh
+➜  ~ cligpt --resume <PATH TO CONVERSATION TO RESUME>
 ```
