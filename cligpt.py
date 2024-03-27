@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 import json, argparse
-import functools
+import functools, subprocess
 import os, datetime
 import urllib.request
 import urllib.error
