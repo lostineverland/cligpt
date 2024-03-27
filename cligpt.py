@@ -236,7 +236,10 @@ def cli_parser(config):
         help='Resume from a previous chat by providing the path to that chat.')
     parser.add_argument('--update', dest='update', action='store_true', default=False, help='Update cligpt')
     parser.add_argument('--force', dest='force', action='store_true', default=False, help='Add to force an update without having to define `source`')
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.path and not args.path.lower().endswith('.md'):
+        args.path = args.path + '.md'
+    return args
 
 def main():
     config = get_config()
