@@ -53,7 +53,7 @@ def iso_month():
     return datetime.datetime.now().strftime(ISO_8601_MONTH)
 
 def iso_minute():
-    ISO_8601_MINUTES = '%Y-%m-%dT%H-%M'
+    ISO_8601_MINUTES = '%Y-%m-%dT%H:%M'
     return datetime.datetime.now().strftime(ISO_8601_MINUTES)
 
 def input_block(prompt):
@@ -137,7 +137,7 @@ def enter_query_loop(args, query, config, resume=None):
                     + resume.get('messages')
     else:
         mode = 'w'
-        log_path = os.path.join(setpath(config), iso_year(), iso_month(), '{}.md'.format(iso_minute()))
+        log_path = os.path.join(setpath(config), iso_year(), iso_month(), '{}.md'.format(iso_minute().replace(':', '-')))
         messages = [{"role": "system", "content": args.role}]
     with open(log_path, mode) as log:
         while query:
