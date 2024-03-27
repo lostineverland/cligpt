@@ -205,11 +205,16 @@ def show_history(args, role, messages):
 
 
 def resume_chat(args, config):
-    assert os.access(args.path, os.F_OK), f"couldn't find {args.path}"
-    messages, front_matter = load_messages(args.path)
+    if os.access(args.path, os.F_OK):
+        path = args.path
+    elif os.access(os.path.join(config.get('log_path'), args.path), os.F_OK):
+        path = os.path.join(config.get('log_path'), args.path)
+    else:
+        assert False, f"couldn't find {args.path}"
+    messages, front_matter = load_messages(path)
     role = front_matter.get('role', args.role)
     resume = dict(
-        path=args.path,
+        path=path,
         role=role,
         messages=messages)
     show_history(args, role, messages)
