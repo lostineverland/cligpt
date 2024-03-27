@@ -219,7 +219,8 @@ def resume_chat(args, config):
         messages=messages)
     show_history(args, role, messages)
     query = input_block(f"{args.model}:\n")
-    enter_query_loop(args, query, config, resume)
+    if query:
+        enter_query_loop(args, query, config, resume)
 
 def cli_parser(config):
     '''CLI tools'''
