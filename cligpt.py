@@ -1,10 +1,28 @@
 #! /usr/bin/env python3
 
 import json, argparse
+import functools
 import os, datetime
 import urllib.request
 import urllib.error
 from collections import namedtuple
+
+nullfunc = lambda *a, **k: None
+nullfile = namedtuple('nullfile',
+    ['write', 'flush']
+    )(print, nullfunc)
+
+def once(func):
+    c = 0
+    res = []
+    @functools.wraps(func)
+    def f(*args, **kwargs):
+        nonlocal c
+        if c == 0:
+            c += 1
+            res.append(func(*args, **kwargs))
+        return res[0]
+    return f
 
 def callgpt(messages, model, api_key):
     endpoint = 'https://api.openai.com/v1/chat/completions'
@@ -52,14 +70,25 @@ def process_response(resp):
     model = resp['model']
     return message, model
 
-def log_interaction(log, query, answer):
+@once # this function will only run once
+def log_front_matter(log, params):
+    log.write(f'---\n{json.dumps(params, indent=2)}\n---\n')
+
+def render_response(query, answer):
     u_ = lambda s: '-' * len(s) # underline function
     q = 'Question:'
     a = 'Answer:'
     rendered_q = f'{q}\n{u_(q)}\n{query}\n\n'
     rendered_a = f'{a}\n{u_(a)}\n{answer}\n\n\n'
-    log.write(rendered_q + rendered_a)
+    return rendered_q, rendered_a
+
+def write_interaction(log, content):
+    log.write(content)
     log.flush()
+    
+def log_interaction(log, query, answer):
+    rendered_q, rendered_a = render_response(query, answer)
+    write_interaction(log, rendered_q + rendered_a)
     print('\n' + rendered_a, flush=True)
 
 def setpath(config):
@@ -97,18 +126,30 @@ def summary(log, args, config, messages):
     message, model = process_response(response)
     print(message.get('content'))
     s = 'Summary Keywords'
-    log.write('\n\n{}\n{}\n{}'.format(s, '-'*len(s), message.get('content')))
+    log.write('\n\n{}\n{}\n{}\n'.format(s, '-'*len(s), message.get('content')))
 
-def enter_query_loop(args, query, config):
+def enter_query_loop(args, query, config, resume=None):
     api_key = config.get('api_key')
-    log_path = os.path.join(setpath(config), iso_year(), iso_month(), '{}.md'.format(iso_minute()))
-    messages = [{"role": "system", "content": args.role}]
-    with open(log_path, 'w') as log:
+    if resume:
+        mode = 'a'
+        log_path = resume['path']
+        messages = [{"role": "system", "content": resume.get('role', args.role)}] \
+                    + resume.get('messages')
+    else:
+        mode = 'w'
+        log_path = os.path.join(setpath(config), iso_year(), iso_month(), '{}.md'.format(iso_minute()))
+        messages = [{"role": "system", "content": args.role}]
+    with open(log_path, mode) as log:
         while query:
             messages += [dict(role='user', content=query)]
             response = callgpt(messages, args.model, api_key)
             message, model = process_response(response)
             messages += [message]
+            log_front_matter(log, dict(
+                    role=args.role,
+                    model=model,
+                    timestamp=iso_minute(),
+                ))
             log_interaction(log, query, message['content'])
             query = input_block(f"{model}:\n")        
         summary(log, args, config, messages)
@@ -126,6 +167,55 @@ def update(config, args):
     process.wait()
     print('update succeeded')
 
+def process_question(question):
+    a_delimeter = '\n\nAnswer:\n-------\n'
+    s_delimeter = '\n\n\nSummary Keywords'
+    msg = question.split(a_delimeter)
+    ans = msg[1].split(s_delimeter)[0]
+    return [
+        dict(role='user', content=msg[0]),
+        dict(role='assistant', content=ans),
+        ]
+
+def get_front_matter(raw_msg):
+    if raw_msg.split()[0] == '---':
+        try:
+            return json.loads(raw_msg.split('---')[1])
+        except:
+            pass
+    return {}
+
+def load_messages(path):
+    q_delimeter = 'Question:\n---------\n'
+    messages = []
+    with open(path) as f:
+        raw_msg = f.read()
+        front_matter = get_front_matter(raw_msg)
+        for question in raw_msg.split(q_delimeter)[1:]:
+            messages += process_question(question)
+    return messages, front_matter
+
+def show_history(args, role, messages):
+    print("The previous conversation was:")
+    for q, a in zip(messages[::2], messages[1::2]):
+        question, answer = render_response(q['content'], a['content'])
+        write_interaction(nullfile, question)
+        write_interaction(nullfile, answer)
+    print('role: {}\nmodel: {}'.format(role, args.model))
+
+
+def resume_chat(args, config):
+    assert os.access(args.path, os.F_OK), f"couldn't find {args.path}"
+    messages, front_matter = load_messages(args.path)
+    role = front_matter.get('role', args.role)
+    resume = dict(
+        path=args.path,
+        role=role,
+        messages=messages)
+    show_history(args, role, messages)
+    query = input_block(f"{args.model}:\n")
+    enter_query_loop(args, query, config, resume)
+
 def cli_parser(config):
     '''CLI tools'''
     parser = argparse.ArgumentParser(description='This runs OpenAI GPT from the terminal. Press CTRL-C to exit.')
@@ -135,6 +225,9 @@ def cli_parser(config):
         dest='model',
         default=config.get('model', 'gpt-4'),
         help='Which model ie "gpt-4-turbo-preview"')
+    parser.add_argument('-r', '--resume',
+        dest='path',
+        help='Resume from a previous chat by providing the path to that chat.')
     parser.add_argument('--update', dest='update', action='store_true', default=False, help='Update cligpt')
     parser.add_argument('--force', dest='force', action='store_true', default=False, help='Add to force an update without having to define `source`')
     return parser.parse_args()
@@ -143,10 +236,13 @@ def main():
     config = get_config()
     args = cli_parser(config)
     if args.update: return update(config, args)
-    print('role: {}\nmodel: {}'.format(args.role, args.model))
-    query = input_block(f"{args.model}:\n")
-    if query:
-        enter_query_loop(args, query, config)
+    if args.path:
+        resume_chat(args, config)
+    else:
+        print('role: {}\nmodel: {}'.format(args.role, args.model))
+        query = input_block(f"{args.model}:\n")
+        if query:
+            enter_query_loop(args, query, config)
 
 if __name__ == '__main__':
     main()
