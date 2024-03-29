@@ -127,6 +127,7 @@ def summary(log, args, config, messages):
     print(message.get('content'))
     s = 'Summary Keywords'
     log.write('\n\n{}\n{}\n{}\n'.format(s, '-'*len(s), message.get('content')))
+    print('note created:', log.name)
 
 def enter_query_loop(args, query, config, resume=None):
     api_key = config.get('api_key')
