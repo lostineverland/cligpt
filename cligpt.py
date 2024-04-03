@@ -91,6 +91,10 @@ def log_interaction(log, query, answer):
     write_interaction(log, rendered_q + rendered_a)
     print('\n' + rendered_a, flush=True)
 
+def show_editor(args, log):
+    cmd = [args.editor, args.editor_args, log.name]
+    process = subprocess.Popen(cmd, stdout=None, stderr=None)
+
 def setpath(config):
     log_path = config.get('log_path', 'GPT_logs')
     os.makedirs(os.path.join(os.getcwd(), log_path, iso_year(), iso_month()), exist_ok=True)
@@ -152,6 +156,7 @@ def enter_query_loop(args, query, config, resume=None):
                     timestamp=iso_minute(),
                 ))
             log_interaction(log, query, message['content'])
+            if args.show_editor: show_editor(args, log)
             query = input_block(f"{model}:\n")        
         summary(log, args, config, messages)
 
@@ -235,6 +240,15 @@ def cli_parser(config):
     parser.add_argument('-r', '--resume',
         dest='path',
         help='Resume from a previous chat by providing the path to that chat.')
+    parser.add_argument('-e', '--editor', dest='show_editor', action='store_true', default=False, help='Automatically open the editor, must be set in .cligpt or via CLI params.')
+    parser.add_argument('--set-editor',
+        dest='editor',
+        default=config.get('editor'),
+        help="ex: cligpt -e subl")
+    parser.add_argument('--editor-args',
+        dest='editor_args',
+        default=config.get('editor_args'),
+        help="Extra arguments for the editor, such as project path")
     parser.add_argument('--update', dest='update', action='store_true', default=False, help='Update cligpt')
     parser.add_argument('--force', dest='force', action='store_true', default=False, help='Add to force an update without having to define `source`')
     args = parser.parse_args()
