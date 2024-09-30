@@ -8,25 +8,16 @@ Every interaction is logged at the current working directory in a folder called 
 
 I'm not a fan of the chatGPT web interface, and in particular the lack of ability to search through my history. But the real reason is that I have kids, nieces and nephews with whom I would like to share chatGPT, and the openAI API makes this really easy. Dad/uncle pays for the service and they can use it at will.
 
-### Use Case
-
-The use case for them is simple, most of them are using MacOS, so it's very easy to hit `cmd-space` type `terminal` and use the arrows keys to bring up the command and navigate through different contexts. Since it is just a chat, the terminal is ideal.
-
-I also want them to learn about the interaction, context really matters, this is not like a search engine. With this in mind, multi-line inputs encourages a more thorough and thought-out prompt.
-
-On the history or consumption side, they can use Obsidian, Logseq or any markdown reader to lookup their past queries and organize their thoughts around the topic. Though, this aims to optimize consumption with Obsidian.
-
-### Why not a plug-in
-
-A plug-in may still happen, but I wanted an MVP. After all, I don't really know that they will use it. Also, I'm a SublimeText user, so I would create a plug-in only for sublime, which is not the most popular choice. What I should make is an Obsidian plug-in, but there are already plenty of those. Again, this is just an MVP.
-
 ## Installation
+
+```sh
+pip install git+https://github.com/lostineverland/cligpt.git
+```
+
+or:
 
 - clone the repository, ensure that `cligpt.py` is executable, it should already be.
 - add to your `$PATH` and run it
-  - I like to create a symlink to the executable from a dir in `$PATH`
-    -  `cd ~/bin && ln -s <repository>/cligpt.py cligpt`
-  - `cligpt`
     - this creates the config file
 - Obtain an API key from [OpenAI](https://platform.openai.com/api-keys)
 - place the key in `$HOME/.cligpt`
