@@ -5,12 +5,16 @@ description = "A simple python script to interact with OpenAI's API."
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = []
+authors = [
+  { name="Carlos Bonilla", email="lostineverland@gmail.com" }
+]
+license = { text="MIT" }
 
 # [tool.hatch.build.targets.wheel]
 # packages = ["cligpt"]
 
-# [project.scripts]
-# cligpt = "cligpt:main"
+[project.scripts]
+cligpt = "cligpt:main"
 
 [tool.uv.sources]
 
